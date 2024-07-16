@@ -1,0 +1,27 @@
+@model IEnumerable<MESDashboard.Models.Ticket>
+
+<h2>Submitted Tickets</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Ticket ID</th>
+            <th>Department</th>
+            <th>Priority</th>
+            <th>Issue</th>
+            <th>Submitted At</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var ticket in Model)
+        {
+            <tr>
+                <td>@ticket.Id</td>
+                <td>@ticket.Department</td>
+                <td>@ticket.Priority</td>
+                <td>@ticket.Issue</td>
+                <td>@ticket.SubmittedAt</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<a href="@Url.Action("Submit", "Tickets")" class="btn btn-primary">Submit New Ticket</a>

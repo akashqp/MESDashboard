@@ -1,0 +1,28 @@
+<body style="background: radial-gradient(circle at 12.3% 19.3%, rgb(85, 88, 218) 0%, rgb(95, 209, 249) 100.2%);">
+    <h1 style="color: #FFD700; font-family: Arial; font-weight: bold; position: relative; top: 35vh; left: 10vh; font-size: 80px;">Generative AI</h1>
+</body>
+@* <h2>Pipe Production Dashboard</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Diameter (mm)</th>
+            <th>Length (m)</th>
+            <th>Production Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var pipe in Model)
+        {
+            <tr>
+                <td>@pipe.Id</td>
+                <td>@pipe.Type</td>
+                <td>@pipe.Diameter</td>
+                <td>@pipe.Length</td>
+                <td>@pipe.ProductionDate.ToShortDateString()</td>
+            </tr>
+        }
+    </tbody>
+</table> *@

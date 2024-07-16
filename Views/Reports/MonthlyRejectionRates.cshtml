@@ -1,0 +1,31 @@
+@{
+    ViewData["Title"] = "Monthly Rejection Reasons";
+}
+
+<h2>Monthly Rejection Rates</h2>
+<canvas id="monthlyRejectionRates" width="400" height="400"></canvas>
+
+@section Scripts {
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const month = urlParams.get('month');
+        if (!month) {
+            // If the months is not provided, then ask for the month from options 3, 6 or 12 month
+            const months = [3, 6, 12];
+            const month = prompt('Please enter the number of months to display the data for (3, 6, 12)', '3');
+            // Check if the month is valid
+            if (!months.includes(parseInt(month))) {
+                alert('Invalid month. Please enter 3, 6 or 12');
+            }
+            // Redirect to the same page with the month as a query parameter
+            window.location.href = window.location.href + '?month=' + month;
+        }
+        // Get the value of months parameter from the URL
+        var months = @Html.Raw(Json.Serialize(ViewData["months"]));
+        console.log(months);
+
+        // Send the months to the backend
+        
+
+    </script>
+}

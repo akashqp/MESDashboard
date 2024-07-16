@@ -1,0 +1,474 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MESDashboard</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/MESDashboard.styles.css" asp-append-version="true" />
+    <style>
+        a.navbar-brand {
+        white-space: normal;
+        text-align: center;
+        word-break: break-all;
+        }
+
+        a {
+        color: #0077cc;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 75%; /* Adjust the width to ensure proper alignment */
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background-color: #eee;
+            align-self: flex-end; /* Align user messages to the right */
+            text-align: right;
+            font-size: 18px;
+        }
+
+        .bot-message {
+            background-color: #007bff;
+            color: #fff;
+            align-self: flex-start; /* Align bot messages to the left */
+            text-align: left;
+            font-size: 18px;
+        }
+        .option-button {
+        display: inline-block;
+        margin: 5px;
+        padding: 10px 20px;
+        background-color: #609cf7;
+        color: white;
+        border-radius: 20px;
+        cursor: pointer;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        font-size: 18px;
+        align-self: flex-start;
+        max-width: 75%;
+        }
+        .option-button:hover {
+        background-color: #0056b3;
+        }
+        .bot-link {
+            color: #ff9900;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .composition-box {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 50px;
+            width: 300px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .composition-item {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MESDashboard</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Dashboard/Index">Dashboard</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarTickets" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Tickets
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarTickets">
+                                <a class="dropdown-item" href="/Tickets/Submit">Submit Ticket</a>
+                                <a class="dropdown-item" href="/Tickets/SubmittedTickets">Submitted Tickets</a>
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarReports" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Reports
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarReports">
+                                <a class="dropdown-item" href="/Reports/Production">Production Report</a>
+                                <a class="dropdown-item" href="/Reports/Downtime">Downtime Report</a>
+                                <a class="dropdown-item" href="/Reports/ProductionAnalysis">Production Analysis</a>
+                                <a class="dropdown-item" href="/Reports/MonthlyRejectionRates">Monthly Rejection Rates</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Chatbot HTML -->
+    <div id="chat-icon" onclick="toggleChatWindow()">
+        <img src='https://i.postimg.cc/XNHmjfxc/Factory-Magix-AI-1.png' border='0' alt="Chat Icon">
+    </div>
+    <div id="chat-container" style="display: none;">
+        <div id="chat-window">
+            <div id="chat-header">
+                Factory Magix AI
+                <div id="cross-icon" onclick="toggleChatWindow()">-</div>
+            </div>  
+            <button id="start-new-chat-btn" style="float: right;">New Chat</button>
+            <div id="chat-output"></div>
+            <div id="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Type a message..." />
+                <button id="send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Chatbot JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const response = await fetch('/api/chatbot');
+            var responseData = await response.json();
+            console.log(responseData.result)
+            console.log(responseData.result.length)
+            if (responseData.result.length == 0) {
+                 await fetch('api/chathistory/addinitialmessage', {
+                    method: 'Get',
+                });
+                const response1 = await fetch('/api/chatbot');
+                const responseData1 = await response1.json();
+                responseData = responseData1;
+            }
+            const chathistory = JSON.parse(responseData.result);
+            chathistory.forEach(message => {
+                appendToChat(message)
+
+            });
+        });
+
+        function startNewChat() {
+            const output = document.getElementById('chat-output');
+            output.innerHTML = '';
+            fetch('/api/chathistory', {
+                method: 'GET',
+            });
+            window.location.reload();
+        }
+
+        if (window.location.href.includes('#chatbot')) {
+            toggleChatWindow();
+        }
+
+        document.getElementById('start-new-chat-btn').addEventListener('click', startNewChat);
+
+        function appendToChat(message) {
+            const output = document.getElementById('chat-output');
+            
+            if (message['user']) {
+                const userMessage = document.createElement('div');
+                userMessage.textContent = 'You: ' + message['user']
+                userMessage.classList.add('message', 'user-message');
+                output.appendChild(userMessage);
+                output.scrollTop = output.scrollHeight;
+            }
+
+            if (message['bot']) {
+                const botMessage = document.createElement('div');
+                botMessage.textContent = 'Bot: ' + message['bot']
+                botMessage.classList.add('message', 'bot-message');
+                output.appendChild(botMessage);
+                output.scrollTop = output.scrollHeight;
+            }
+            // convert string to list
+            const options = JSON.parse(message['options']);
+            if (options.length > 0){
+                if (options[0].startsWith('/')) {
+                    renderLinks(options);
+                }
+                else {
+                    renderOptions(options);
+                }
+            }
+        }
+
+        function toggleChatWindow() {
+
+            const chatContainer = document.getElementById('chat-container');
+            const chatIcon = document.getElementById('chat-icon');
+            const crossIcon = document.getElementById('cross-icon');
+            const chatInput = document.getElementById('chat-input');
+
+            if (window.location.href.includes('#chatbot')) {
+                if (chatContainer.style.display === 'none' || chatContainer.style.display === '') {
+                    chatContainer.style.display = 'block';
+                    chatIcon.style.display = 'flex';
+                    crossIcon.style.display = 'flex';
+                    chatInput.focus();
+                    return;
+                }
+                else {
+                    history.replaceState(null, null, window.location.href.replace('#chatbot', '') );
+                    chatContainer.style.display = 'none';
+                    chatIcon.style.display = 'flex';
+                    crossIcon.style.display = 'none';
+                    return;
+                }                
+            }
+            else {
+                window.location.href += '#chatbot';
+                chatContainer.style.display = 'block';
+                chatIcon.style.display = 'flex';
+                crossIcon.style.display = 'flex';
+                chatInput.focus();
+            }
+        }
+
+        async function sendMessage(message) {
+            const output = document.getElementById('chat-output');
+            if (!message) return;
+
+            const userMessage = document.createElement('div');
+            userMessage.textContent = 'You: ' + message;
+            userMessage.classList.add('message', 'user-message');
+            output.appendChild(userMessage);
+            output.scrollTop = output.scrollHeight;
+
+            const response = await fetch('/api/chatbot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+            const responseData = await response.json();
+            console.log(responseData.message.result.message);
+
+            const botMessage = document.createElement('div');
+            botMessage.innerHTML = 'Bot: ' + responseData.message.result.message;
+            botMessage.classList.add('message', 'bot-message');
+            output.appendChild(botMessage);
+
+            if (responseData.message.result.options) {
+                const firstOption = responseData.message.result.options[0];
+                if (firstOption == 'Open in Same Page') {
+                    if (responseData.message.result.title == "Monthly Rejection Reasons") {
+                        // Remove the Background Colour of the body
+                        document.body.style.background = 'none';
+
+                        // Hide other elements on the webpage
+                        document.getElementById('cross-icon').style.display = 'none';
+                        document.getElementById('chat-container').style.display = 'none';
+
+                        // Destroy the container
+                        document.querySelector('.container[b-pwsk8vmhbv]').remove();
+                        
+                        // Recreate the same container
+                        const container = document.createElement('div');
+                        container.className = 'container';
+                        container.setAttribute('b-pwsk8vmhbv', '');
+                        
+                        // Create h2 for testing
+                        const h2 = document.createElement('h2');
+                        h2.textContent = 'Monthly Rejection Reasons';
+                        container.appendChild(h2);
+
+                        //Change the url without reloading
+                        window.history.pushState({}, '', '/Reports/ProductionAnalysis');
+
+                        console.log("Response Data: ", responseData.message.result.response);
+                        const response = JSON.parse(responseData.message.result.response);
+                        console.log("Response: ", response);
+
+                        // Create a graph using the response
+                        // Create an element to hold the graph
+                        const canvas = document.createElement('canvas');
+                        canvas.id = 'monthlyRejectionReasonsChart';
+                        container.appendChild(canvas);
+
+                        // Append the new container to the body of the document
+                        document.body.appendChild(container);
+
+                        //Create div for composition box
+                        const compositionBox = document.createElement('div');
+                        compositionBox.id = 'composition-box';
+                        compositionBox.className = 'composition-box';
+                        document.body.appendChild(compositionBox);
+
+                        // Create the graph
+                        var ctx = document.getElementById('monthlyRejectionReasonsChart').getContext('2d');
+
+                        // Extract labels and data from the response
+                        var labels = response.labels;
+                        var data = response.data;
+                        var details = response.details;
+                        var composition = response.composition;
+
+                        // Replace the elements of data with their lenghts
+                        // data = data.map(function (element) {
+                        //     return element.length;
+                        // });
+                        console.log("Data: ", data);
+
+                        var chart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Number of Rejections',
+                                    data: data,
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    borderWidth: 1, 
+                                    hoverBackgroundColor: 'rgba(75, 192, 192, 0.4)', // Change the color when hovering over a bar
+                                    hoverBorderColor: 'rgba(75, 192, 192, 1)', // Change the border color when hovering over a bar
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        grid: {
+                                            color: 'rgba(0, 0, 0, 0.1)', // Change the color of the grid lines
+                                        },
+                                        ticks: {
+                                            color: 'rgba(0, 0, 0, 0.6)', // Change the color of the ticks
+                                        }
+                                    },
+                                    x: {
+                                        grid: {
+                                            display: false, // Hide the grid lines on the x-axis
+                                        },
+                                        ticks: {
+                                            color: 'rgba(0, 0, 0, 0.6)', // Change the color of the ticks
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            afterBody: function(context) {
+                                                var month = context[0].label;
+                                                return response.details[month].map(function(detail) {
+                                                    return detail.faultType + ': ' + detail.count;
+                                                });
+                                            }
+                                        }
+                                    },
+                                },
+                                onClick: (event, elements) => {
+                                    if (elements.length > 0) {
+                                        const index = elements[0].index;
+                                        console.log("Response: ", response['composition'][labels[index]])
+                                        const selectedMonth = labels[index];
+                                        const composition = response['composition'][labels[index]];
+
+                                        // Move the chart to the left
+                                        document.getElementById('monthlyRejectionReasonsChart').style.marginLeft = '0';                                        
+                                        
+                                        // Check if the composition is currently displayed
+                                        const compositionBox = document.getElementById('composition-box')
+                                        const displayedMonth = compositionBox.getAttribute('data-month');
+
+                                        if (compositionBox.style.display === 'block' && displayedMonth === selectedMonth) {
+                                            // Hide the composition box if it's currently visible and displaying the selected month
+                                            compositionBox.style.display = 'none';
+                                        } else {
+                                            // Show the composition data in the box
+                                            compositionBox.innerHTML = `
+                                                <h3>Main Compositions for Rejection</h3>
+                                                ${Object.entries(composition).map(([key, value]) => `<div class="composition-item"><strong>${key}:</strong> ${value}</div>`).join('')}
+                                            `;
+                                            compositionBox.style.display = 'block';
+                                            compositionBox.setAttribute('data-month', selectedMonth);
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+                else if (firstOption.startsWith('/')) {
+                    responseData.message.result.link = responseData.message.result.options;
+                }
+                else {
+                    renderOptions(responseData.message.result.options);
+                }
+            }
+
+            if (responseData.message.result.link) {
+                renderLinks(responseData.message.result.link);
+            }
+
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function renderOptions(options) {
+            const output = document.getElementById('chat-output');
+            if (!options) return;
+
+            options.forEach(option => {
+                const optionButton = document.createElement('div');
+                optionButton.className = 'option-button';
+                optionButton.textContent = option;
+                optionButton.onclick = () => sendMessage(option);
+                output.appendChild(optionButton);
+            });
+        }
+
+        function renderLinks(links) {
+            const output = document.getElementById('chat-output');
+            if (!links) return;
+
+            links.forEach(link => {
+                const linkElement = document.createElement('a');
+                linkElement.className = 'bot-link';
+                linkElement.href = link;
+                linkElement.textContent = link;
+                linkElement.target = '_blank';
+                output.appendChild(linkElement);
+            });
+        }
+
+        document.getElementById('send-btn').addEventListener('click', () => {
+            const input = document.getElementById('chat-input');
+            sendMessage(input.value);
+            input.value = '';
+        });
+
+        document.getElementById('chat-input').addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                document.getElementById('send-btn').click();
+            }
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

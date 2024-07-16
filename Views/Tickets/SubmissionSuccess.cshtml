@@ -1,0 +1,6 @@
+@model MESDashboard.Models.Ticket
+
+<h2>Ticket Submitted Successfully</h2>
+<p>Your ticket has been submitted successfully. Your Ticket ID is: <strong>@Model.Id</strong></p>
+<a href="@Url.Action("SubmittedTickets", "Tickets")" class="btn btn-primary">View Submitted Tickets</a>
+<a href="@Url.Action("Submit", "Tickets")" class="btn btn-secondary">Submit Another Ticket</a>

@@ -1,0 +1,86 @@
+@model IEnumerable<MESDashboard.Models.DowntimeReport>
+
+@{
+    ViewData["Title"] = "Downtime Report";
+}
+
+<h2>Downtime Report</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Machine</th>
+            <th>Reason</th>
+            <th>Downtime Duration</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var report in Model)
+        {
+            <tr>
+                <td>@report.ReportDate.ToShortDateString()</td>
+                <td>@report.Machine</td>
+                <td>@report.Reason</td>
+                <td>@report.DowntimeDuration</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div>
+    <canvas id="downtimeChart"></canvas>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var ctx = document.getElementById('downtimeChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.Select(m => m.Machine))),
+                datasets: [{
+                    label: 'Downtime Duration',
+                    @functions {
+                        string GetRandomColor()
+                        {
+                            var letters = "0123456789ABCDEF";
+                            var color = "#";
+                            var random = new Random();
+                            for (var i = 0; i < 6; i++)
+                            {
+                                color += letters[random.Next(16)];
+                            }
+                            return color;
+                        }
+                    }
+                    data: @Html.Raw(Json.Serialize(Model.Select(m => m.DowntimeDuration.TotalHours)))
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var label = context.label || '';
+                                var value = context.raw || 0;
+                                return label + ': ' + value.toFixed(2) + ' hours';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        function GetRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+    </script>
+}

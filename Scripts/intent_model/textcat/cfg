@@ -1,0 +1,17 @@
+{
+  "labels":[
+    "greeting",
+    "help",
+    "view_reports",
+    "view_downtime_reports",
+    "view_production_reports",
+    "production_analysis",
+    "tickets",
+    "submit_ticket",
+    "talk_to_engineer",
+    "view_submitted_tickets",
+    "view_ticket_status"
+  ],
+  "threshold":0.0,
+  "positive_label":null
+}

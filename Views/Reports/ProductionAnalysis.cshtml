@@ -1,0 +1,357 @@
+@{
+    ViewData["Title"] = "Production Analysis";
+}
+
+@* <h2>Production Analysis</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Month</th>
+            <th>Number of Rejections</th>
+            <th>Number of Products</th>
+            <th>Rejection Rate</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Month</td>
+                <td>@item.NumberOfRejections</td>
+                <td>@item.NumberOfProducts</td>
+                <td>@item.RejectionRate</td>
+            </tr>
+        }
+    </tbody>
+</table> *@
+
+
+@* <h2>Rejection Reasons</h2>
+<canvas id="rejectionReasonsChart" width="400" height="200"></canvas>
+<h2>Monthly Rejection Rate</h2>
+<canvas id="monthlyRejectionRateChart" width="400" height="200"></canvas>
+<h2>Correlation Analysis</h2>
+<canvas id="correlationAnalysisChart" width="400" height="200"></canvas>
+<h2>Feature Importance</h2>
+<canvas id="featureImportanceChart" width="400" height="200"></canvas> *@
+
+<h2>Monthly Rejection Reasons</h2>
+<canvas id="monthlyRejectionReasonsChart"></canvas>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            @* var ctx = document.getElementById('rejectionReasonsChart').getContext('2d');
+            var rejectionReasons = @Html.Raw(ViewBag.RejectionReasons);
+            var labels = Object.keys(rejectionReasons);
+            var data = Object.values(rejectionReasons);
+
+            var chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Rejections',
+                        data: data,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                        hoverBackgroundColor: 'rgba(75, 192, 192, 0.4)', // Change the color when hovering over a bar
+                        hoverBorderColor: 'rgba(75, 192, 192, 1)', // Change the border color when hovering over a bar
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)', // Change the color of the grid lines
+                            },
+                            ticks: {
+                                color: 'rgba(0, 0, 0, 0.6)', // Change the color of the ticks
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false, // Hide the grid lines on the x-axis
+                            },
+                            ticks: {
+                                color: 'rgba(0, 0, 0, 0.6)', // Change the color of the ticks
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            var ctx2 = document.getElementById('monthlyRejectionRateChart').getContext('2d');
+            var monthlyRejectionRate = @Html.Raw(ViewBag.MonthlyRejectionRate);
+            var labels2 = Object.keys(monthlyRejectionRate);
+            var data2 = Object.values(monthlyRejectionRate);
+
+            var chart2 = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: labels2,
+                    datasets: [{
+                        label: 'Rejection Rate',
+                        data: data2,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        pointBackgroundColor: 'rgba(54, 162, 235, 1)', // Change the color of the points
+                        pointBorderColor: 'rgba(54, 162, 235, 1)', // Change the color of the point borders
+                        pointHoverBackgroundColor: 'rgba(75, 192, 192, 1)', // Change the color of the points when hovering over them
+                        pointHoverBorderColor: 'rgba(75, 192, 192, 1)', // Change the color of the point borders when hovering over them
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)', // Change the color of the grid lines
+                            },
+                            ticks: {
+                                color: 'rgba(0, 0, 0, 0.6)', // Change the color of the ticks
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)', // Change the color of the grid lines
+                            },
+                            ticks: {
+                                color: 'rgba(0, 0, 0, 0.6)', // Change the color of the ticks
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            var ctx3 = document.getElementById('correlationAnalysisChart').getContext('2d');
+            var correlationAnalysis = @Html.Raw(ViewBag.CorrelationAnalysis);
+            var labels3 = Object.keys(correlationAnalysis);
+            var data3 = Object.values(correlationAnalysis);
+
+            var chart3 = new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: labels3,
+                    datasets: [{
+                        label: 'Correlation Coefficient',
+                        data: data3,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        hoverBackgroundColor: 'rgba(255, 99, 132, 0.4)', // Change the color when hovering over a bar
+                        hoverBorderColor: 'rgba(255, 99, 132, 1)', // Change the border color when hovering over a bar
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)', // Change the color of the grid lines
+                            },
+                            ticks: {
+                                color: 'rgba(0, 0, 0, 0.6)', // Change the color of the ticks
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false, // Hide the grid lines on the x-axis
+                            },
+                            ticks: {
+                                color: 'rgba(0, 0, 0, 0.6)', // Change the color of the ticks
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            var ctx4 = document.getElementById('featureImportanceChart').getContext('2d');
+            var featureImportance = @Html.Raw(ViewBag.FeatureImportance);
+            var labels4 = Object.keys(featureImportance);
+            var data4 = Object.values(featureImportance);
+
+            var chart4 = new Chart(ctx4, {
+                type: 'bar',
+                data: {
+                    labels: labels4,
+                    datasets: [{
+                        label: 'Feature Importance',
+                        data: data4,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                        hoverBackgroundColor: 'rgba(75, 192, 192, 0.4)', // Change the color when hovering over a bar
+                        hoverBorderColor: 'rgba(75, 192, 192, 1)', // Change the border color when hovering over a bar
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)', // Change the color of the grid lines
+                            },
+                            ticks: {
+                                color: 'rgba(0, 0, 0, 0.6)', // Change the color of the ticks
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false, // Hide the grid lines on the x-axis
+                            },
+                            ticks: {
+                                color: 'rgba(0, 0, 0, 0.6)', // Change the color of the ticks
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            }); 
+            *@
+            // Check if the url contains the query parameter 'month'
+            const urlParams = new URLSearchParams(window.location.search);
+            const month = urlParams.get('month');
+            if (!month) {
+                // If the months is not provided, then ask for the month from options 3, 6 or 12 month
+                const months = [3, 6, 12];
+                const month = prompt('Please enter the number of months to display the data for (3, 6, 12)', '3');
+                // Check if the month is valid
+                if (!months.includes(parseInt(month))) {
+                    alert('Invalid month. Please enter 3, 6 or 12');
+                    return;
+                }
+                // Redirect to the same page with the month as a query parameter
+                window.location.href = window.location.href + '?month=' + month;
+            }
+            //Create div for composition box
+            const compositionBox = document.createElement('div');
+            compositionBox.id = 'composition-box';
+            compositionBox.className = 'composition-box';
+            document.body.appendChild(compositionBox);
+
+            // Create the graph
+            var ctx = document.getElementById('monthlyRejectionReasonsChart').getContext('2d');
+
+            // Get the data from the ViewBag
+            var response = @Html.Raw(Json.Serialize(ViewBag.MonthlyRejectionReasons));
+            console.log("Response: ", response);
+
+            // Extract labels and data from the response
+            var labels = response.labels;
+            var data = response.data;
+            var details = response.details;
+            var composition = response.composition;
+
+            // Replace the elements of data with their lenghts
+            data = data.map(function (element) {
+                return element.length;
+            });
+
+            var chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Rejections',
+                        data: data,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                        hoverBackgroundColor: 'rgba(75, 192, 192, 0.4)', // Change the color when hovering over a bar
+                        hoverBorderColor: 'rgba(75, 192, 192, 1)', // Change the border color when hovering over a bar
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)', // Change the color of the grid lines
+                            },
+                            ticks: {
+                                color: 'rgba(0, 0, 0, 0.6)', // Change the color of the ticks
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false, // Hide the grid lines on the x-axis
+                            },
+                            ticks: {
+                                color: 'rgba(0, 0, 0, 0.6)', // Change the color of the ticks
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterBody: function(context) {
+                                    var month = context[0].label;
+                                    return response.details[month].map(function(detail) {
+                                        return detail.faultType + ': ' + detail.count;
+                                    });
+                                }
+                            }
+                        },
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            console.log("Response: ", response['composition'][labels[index]])
+                            const selectedMonth = labels[index];
+                            const composition = response['composition'][labels[index]];
+
+                            // Move the chart to the left
+                            document.getElementById('monthlyRejectionReasonsChart').style.marginLeft = '0';                                        
+                            
+                            // Check if the composition is currently displayed
+                            const compositionBox = document.getElementById('composition-box')
+                            const displayedMonth = compositionBox.getAttribute('data-month');
+
+                            if (compositionBox.style.display === 'block' && displayedMonth === selectedMonth) {
+                                // Hide the composition box if it's currently visible and displaying the selected month
+                                compositionBox.style.display = 'none';
+                            } else {
+                                // Show the composition data in the box
+                                compositionBox.innerHTML = `
+                                    <h3>Main Compositions for Rejection</h3>
+                                    ${Object.entries(composition).map(([key, value]) => `<div class="composition-item"><strong>${key}:</strong> ${value}</div>`).join('')}
+                                `;
+                                compositionBox.style.display = 'block';
+                                compositionBox.setAttribute('data-month', selectedMonth);
+                            }
+                        }
+                    }
+                }
+            });
+            
+        });
+    </script>
+}
